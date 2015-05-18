@@ -30,13 +30,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -120,14 +115,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 	 */	
 	private boolean mWindowAttached = false;
 	/**
-	 * View Layout being shown over ActionBar
-	 */	
-	private GoogleStyleViewLayout mGoogleStyleViewLayout;
-	/**
-	 * Progress Bar being shown over ActionBar
-	 */
-	private GoogleStyleProgressLayout mGoogleStyleProgressLayout;	
-	/**
 	 * Progress bar ratating on center while Refreshing
 	 */	
 	private ProgressBar mRefreshableViewProgressBar;
@@ -183,11 +170,7 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 	 * Flag whether Google style view layout's size is set to ActionBar's size 
 	 * (Don't set to false as possible, it's hard to control height if this flag is false)
 	 */
-	private boolean mSetGoogleViewLayoutSizeToActionbarHeight = true;
 
-	private int mYPositionOfGoogleStyleViewLayout;
-
-	private int mYPositionOfGoogleStyleProgressLayout;
 	// ===========================================================
 	// Constructors
 	// ===========================================================
@@ -361,7 +344,7 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 					absDiff = Math.abs(diff);
 
 					if (absDiff > mTouchSlop && (!mFilterTouchEvents || absDiff > Math.abs(oppositeDiff))) {
-						if ((mMode.showHeaderLoadingLayout() || mMode.showGoogleStyle()) && diff >= 1f && isReadyForPullStart()) {
+						if ((mMode.showHeaderLoadingLayout()) && diff >= 1f && isReadyForPullStart()) {
 							mLastMotionY = y;
 							mLastMotionX = x;
 							mIsBeingDragged = true;
@@ -661,9 +644,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 	 */
 	public final Orientation getFilteredPullToRefreshScrollDirection() {
 		Orientation orientation = getPullToRefreshScrollDirection();
-		if (mMode.showGoogleStyle() ) {
-			orientation = Orientation.VERTICAL;
-		}
 		return orientation;
 	}
 
@@ -724,32 +704,7 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 	protected LoadingLayout createLoadingLayout(Context context, Mode mode, TypedArray attrs) {
 		return LoadingLayoutFactory.createLoadingLayout(mLoadingLayoutClazz, context, mode, getFilteredPullToRefreshScrollDirection(), attrs);
 	}
-	/**
-	 * Create a new google style view layout instance by using the class token 
-	 * @param layoutCode Google style view layout code to be converted to some class token 
-	 * @param context
-	 * @param mode
-	 * @param attrs
-	 * @return Google style <b>view</b> layout instance which was created by using the class token
-	 */
-	private GoogleStyleViewLayout createGoogleStyleViewLayout(
-			String layoutCode, Context context, TypedArray a) {
-		Class<? extends GoogleStyleViewLayout> clazz = GoogleStyleViewLayoutFactory.createGoogleStyleViewLayoutClazzByLayoutCode(layoutCode);
-		return GoogleStyleViewLayoutFactory.createGoogleStyleViewLayout(clazz, context, a);
-	}	
-	/**
-	 * Create a new google style progress layout instance by using the class token 
-	 * @param layoutCode google style progress layout code  to be converted to some class token 
-	 * @param context
-	 * @param mode
-	 * @param attrs
-	 * @return Google style <b>progress</b> layout instance which was created by using the class token
-	 */
-	private GoogleStyleProgressLayout createGoogleStyleProgressLayout(
-			String layoutCode, Context context, TypedArray a) {
-		Class<? extends GoogleStyleProgressLayout> clazz = GoogleStyleProgressLayoutFactory.createGoogleStyleProgressLayoutClazzByLayoutCode(layoutCode);
-		return GoogleStyleProgressLayoutFactory.createGoogleStyleProgressLayout(clazz, context, a);
-	}
+
 	/**
 	 * Used internally for {@link #getLoadingLayoutProxy(boolean, boolean)}.
 	 * Allows derivative classes to include any extra LoadingLayouts.
@@ -801,10 +756,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 
 	protected final int getHeaderSize() {
 		return mHeaderLayout.getContentSize();
-	}
-
-	protected final int getGoogleStyleViewSize() {
-		return mGoogleStyleViewLayout.getContentSize();
 	}
 
 	protected int getPullToRefreshScrollDuration() {
@@ -873,11 +824,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 			case PULL_FROM_END:
 				mFooterLayout.pullToRefresh();
 				break;
-			case GOOGLE_STYLE:
-				showViewTopLayout();
-				mGoogleStyleViewLayout.pullToRefresh();
-				mGoogleStyleProgressLayout.pullToRefresh();
-				break;
 			case PULL_FROM_START:
 				mHeaderLayout.pullToRefresh();
 				break;
@@ -902,20 +848,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 		}
 		if (mMode.showFooterLoadingLayout()) {
 			mFooterLayout.refreshing();
-		}
-		if (mMode.showGoogleStyle()) {
-			// Fade-out mRefreshableView
-			if ( mRefeshableViewHideWhileRefreshingEnabled == true ) {
-				AlphaAnimator.fadeout(mRefreshableView, mRefeshableViewHideWhileRefreshingDuration);	
-			}
-			// Fade-in refreshing bar on center
-			if (mRefeshableViewRefreshingBarViewWhileRefreshingEnabled == true ) {
-				mRefreshableViewProgressBar.setVisibility(View.VISIBLE);
-				AlphaAnimator.fadein(mRefreshableViewProgressBar, mRefeshableViewRefreshingBarViewWhileRefreshingDuration);
-			}
-
-			mGoogleStyleViewLayout.refreshing();
-			mGoogleStyleProgressLayout.refreshing();
 		}
 
 		if (doScroll) {
@@ -957,10 +889,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 			case PULL_FROM_END:
 				mFooterLayout.releaseToRefresh();
 				break;
-			case GOOGLE_STYLE:
-				mGoogleStyleViewLayout.releaseToRefresh();
-				mGoogleStyleProgressLayout.releaseToRefresh();
-				break;
 			case PULL_FROM_START:
 				mHeaderLayout.releaseToRefresh();
 				break;
@@ -981,35 +909,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 		// Always reset both layouts, just in case...
 		mHeaderLayout.reset();
 		mFooterLayout.reset();
-		if (mMode.showGoogleStyle()) {
-			mGoogleStyleViewLayout.reset();
-			hideViewTopLayout();
-			mGoogleStyleProgressLayout.reset();
-
-			// Fade-in mRefreshableView
-			if ( mRefreshing == true && mRefeshableViewHideWhileRefreshingEnabled == true ) {
-				mRefreshableView.clearAnimation();
-				AlphaAnimator.fadein(mRefreshableView, mRefeshableViewHideWhileRefreshingDuration);
-			}
-			// Fade-out refreshing bar on center
-			if (mRefeshableViewRefreshingBarViewWhileRefreshingEnabled == true ) {
-				AlphaAnimator.fadeout(mRefreshableViewProgressBar, mRefeshableViewRefreshingBarViewWhileRefreshingDuration, new AnimationListener(){
-					@Override
-					public void onAnimationEnd(Animation animation) {
-						mRefreshableViewProgressBar.setVisibility(View.INVISIBLE);					
-					}
-
-					@Override
-					public void onAnimationRepeat(Animation animation) {
-						// do nothing
-					}
-
-					@Override
-					public void onAnimationStart(Animation animation) {
-						// do nothing
-					}});	
-			}
-		}
 
 		mRefreshing = false;
 		smoothScrollTo(0);
@@ -1123,16 +1022,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 				if (mMode.showHeaderLoadingLayout()) {
 					mHeaderLayout.setHeight(maximumPullScroll);
 					pTop = -maximumPullScroll;
-				} else if (mMode.showGoogleStyle() && mWindowAttached == true ) {
-					/**
-					 * Set size of {@code GoogleStyleViewLayout} to ActionBar's size if {@code mSetGoogleViewLayoutSizeToActionbarHeight} is true
-					 * This code is a default action, but if you want to use custom size of {@code GoogleStyleViewLayout}, set {@code ptrSetGoogleViewLayoutSizeToActionbarHeight} to false in layout xml (but not recommended).
-					 */
-					if (mSetGoogleViewLayoutSizeToActionbarHeight == true) {
-						mGoogleStyleViewLayout.setHeight(mActionBarHeight);
-					}
-
-					pTop = 0;
 				} else {
 					pTop = 0;
 				}
@@ -1191,9 +1080,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 		if (mLayoutVisibilityChangesEnabled) {
 			if (value < 0) {
 				switch (mCurrentMode) {
-					case GOOGLE_STYLE:
-						mGoogleStyleViewLayout.setVisibility(View.VISIBLE);
-						break;
 					default:	
 					case PULL_FROM_START:
 						mHeaderLayout.setVisibility(View.VISIBLE);
@@ -1215,11 +1101,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 			 */
 			ViewCompat.setLayerType(mRefreshableViewWrapper, value != 0 ? LAYER_TYPE_HARDWARE 
 					: LAYER_TYPE_NONE /* View.LAYER_TYPE_NONE */);
-		}
-
-		// skip ScrollTo(...) 
-		if (mMode.showGoogleStyle() ) {
-			return;
 		}
 
 		switch (getFilteredPullToRefreshScrollDirection()) {
@@ -1307,35 +1188,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 			return;
 		}
 
-		if ( mMode.showGoogleStyle() == false ) {
-            return;
-        }
-
-		// We need to use the correct LayoutParam values, based on scroll
-		// direction
-		//
-		if ( mTopActionbarLayout == mGoogleStyleViewLayout.getParent()) {
-			mTopActionbarLayout.removeView(mGoogleStyleViewLayout);
-		}
-
-		Log.d(LOG_TAG, "mViewOnTopLayout has been added." + mGoogleStyleViewLayout);
-		mTopActionbarLayout.addView(mGoogleStyleViewLayout);
-		/**
-		 * Set size of {@code GoogleStyleViewLayout} to ActionBar's size if {@code mSetGoogleViewLayoutSizeToActionbarHeight} is true
-		 * This code is a default action, but if you want to use custom size of {@code GoogleStyleViewLayout}, set {@code ptrSetGoogleViewLayoutSizeToActionbarHeight} to false in layout xml (but not recommended).
-		 */
-		if (mSetGoogleViewLayoutSizeToActionbarHeight == true) {
-			// If it has called setHeight(...) method immediately after {@code view} has been added, the height isn't set correct
-			post(new Runnable(){
-
-				@Override
-				public void run() {
-					mGoogleStyleViewLayout.setHeight(mActionBarHeight);
-				}});			
-		}
-		// Show Google style view layout to screen
-		mGoogleStyleViewLayout.setVisibility(View.VISIBLE);
-		
 		// Hide Loading Views
 		refreshLoadingViewsSize();
 
@@ -1357,7 +1209,7 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 		if (null != mOnRefreshListener) {
 			mOnRefreshListener.onRefresh(this);
 		} else if (null != mOnRefreshListener2) {
-			if (mCurrentMode == Mode.PULL_FROM_START || mCurrentMode == Mode.GOOGLE_STYLE) {
+			if (mCurrentMode == Mode.PULL_FROM_START) {
 				mOnRefreshListener2.onPullDownToRefresh(this);
 			} else if (mCurrentMode == Mode.PULL_FROM_END) {
 				mOnRefreshListener2.onPullUpToRefresh(this);
@@ -1435,11 +1287,7 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 		String googleStyleProgressLayoutCode = null;
 		if (a.hasValue(R.styleable.PullToRefresh_ptrGoogleViewStyle)) {
 			googleStyleProgressLayoutCode = a.getString(R.styleable.PullToRefresh_ptrGoogleProgressStyle);
-		} 
-		// Get a google style view layout
-		mGoogleStyleViewLayout = createGoogleStyleViewLayout(googleStyleViewLayoutCode, context, a);
-		// Get a google style progress layout 
-		mGoogleStyleProgressLayout = createGoogleStyleProgressLayout(googleStyleProgressLayoutCode, context, a);
+		}
 		// Get animation options for Google style mode
 		if (a.hasValue(R.styleable.PullToRefresh_ptrShowGoogleStyleViewAnimationEnabled)) {
 			mShowGoogleStyleViewAnimationEnabled = a.getBoolean(R.styleable.PullToRefresh_ptrShowGoogleStyleViewAnimationEnabled, true);
@@ -1458,11 +1306,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 		}
 		if (a.hasValue(R.styleable.PullToRefresh_ptrViewRefeshableViewProgressBarOnCenterWhileRefreshingDuration)) {
 			mRefeshableViewRefreshingBarViewWhileRefreshingDuration = a.getInteger(R.styleable.PullToRefresh_ptrViewRefeshableViewProgressBarOnCenterWhileRefreshingDuration, REFRESHABLEVIEW_REFRESHING_BAR_VIEW_WHILE_REFRESHING_DURATION);
-		}
-
-		// Get a flag that decides Google View Layout's size is set to ActionBar's 
-		if (a.hasValue(R.styleable.PullToRefresh_ptrSetGoogleViewLayoutSizeToActionbarHeight)) {
-			mSetGoogleViewLayoutSizeToActionbarHeight = a.getBoolean(R.styleable.PullToRefresh_ptrSetGoogleViewLayoutSizeToActionbarHeight, true);
 		}
 
 		// Get width or height attr of refreshing bar 
@@ -1515,8 +1358,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 		initActionBarSize(context);
 		initStatusBarSize(context);
 
-		determineYPositionOfGoogleStyleViewLayout();
-		
 		// Finally update the UI for the modes
 		updateUIForMode();
 		// updateUIForGoogleStyleMode() method will be called when onAttachedToWindow() event has been fired.
@@ -1525,188 +1366,19 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 	private void filterModeForSDKVersion() {
 		// If SDK version is 2.x or lower, Let the mode not be google mode. 
 		// Because google mode should not be supported in those versions.
-		if ( VERSION.SDK_INT < VERSION_CODES.HONEYCOMB && mMode == Mode.GOOGLE_STYLE ) {
+		if ( VERSION.SDK_INT < VERSION_CODES.HONEYCOMB ) {
 			mMode = Mode.PULL_FROM_START;
 		}
 	}
 
-	private void determineYPositionOfGoogleStyleViewLayout() {
-		if ( VERSION.SDK_INT < VERSION_CODES.ICE_CREAM_SANDWICH ) { 
-			mYPositionOfGoogleStyleViewLayout = 0;
-		} else {
-			mYPositionOfGoogleStyleViewLayout = mStatusBarHeight;
-		}
-	}
-	/**
-	 * NOTE : This method must be called after initStatusBarSize() and initActionBarSize() have already been called. Also, mGoogleStyleProgressLayout should be initialized before calling this method. 
-	 */
-	private void determineYPositionOfGoogleStyleProgressLayout() {
-		if ( VERSION.SDK_INT < VERSION_CODES.ICE_CREAM_SANDWICH ) { 
-			mYPositionOfGoogleStyleProgressLayout = mStatusBarHeight + 1;
-		} else {
-			mYPositionOfGoogleStyleProgressLayout = mActionBarHeight + mGoogleStyleProgressLayout.getHeight() + 1;
-		}		
-	}
-	/**
-	 * Show google view layout and google progress layout when pulling
-	 */
-	private void showViewTopLayout() {
-    	if (mMode.showGoogleStyle() == false ) {
-    		return;
-    	}
-
-    	// Initialize Translate and Alpha animation
-    	if ( mShowGoogleStyleViewAnimationEnabled == true ) {
-        	AnimationSet set = new AnimationSet(true /* share interpolator */);
-        	set.setDuration(mShowGoogleStyleViewAnimationDuration);
-        	set.setFillAfter(true);
-        	set.setAnimationListener(new AnimationListener(){
-
-    			@Override
-    			public void onAnimationEnd(Animation anim) {
-    			}
-
-    			@Override
-    			public void onAnimationRepeat(Animation anim) {
-    			}
-
-    			@Override
-    			public void onAnimationStart(Animation anim) {
-    				mTopActionbarLayout.setVisibility(View.VISIBLE);
-    			}});
-        	
-        	TranslateAnimation transAnimation = new TranslateAnimation(Animation.ABSOLUTE, 0,Animation.ABSOLUTE, 0, Animation.ABSOLUTE, -mActionBarHeight, Animation.ABSOLUTE, mYPositionOfGoogleStyleViewLayout);
-        	AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);
-        	set.addAnimation(transAnimation);
-        	set.addAnimation(alphaAnimation);
-        	// Start animation
-        	mTopActionbarLayout.startAnimation(set);    		
-    	} else {
-       		// Show Google style view layout without animation
-    		((FrameLayout.LayoutParams) mTopActionbarLayout.getLayoutParams()).topMargin = mYPositionOfGoogleStyleViewLayout;
-    		mTopActionbarLayout.setVisibility(View.VISIBLE);   		
-    	}
-
-    	mGoogleStyleProgressLayout.setVisibility(View.VISIBLE);
-    }
-
-	/**
-	 * Hide google view layout and google progress layout when releasing
-	 */
-	private void hideViewTopLayout() {
-    	if (mMode.showGoogleStyle() == false ) {
-    		return;
-    	}
-
-    	if ( mShowGoogleStyleViewAnimationEnabled == true ) {
-        	// Initialize Translate and Alpha animation
-    	   	AnimationSet set = new AnimationSet(true /* share interpolator */);
-        	set.setDuration(mShowGoogleStyleViewAnimationDuration);
-        	set.setFillAfter(true);
-        	set.setAnimationListener(new AnimationListener(){
-
-    			@Override
-    			public void onAnimationEnd(Animation anim) {
-    				mTopActionbarLayout.setVisibility(View.INVISIBLE);
-    			}
-
-    			@Override
-    			public void onAnimationRepeat(Animation anim) {
-    			}
-
-    			@Override
-    			public void onAnimationStart(Animation anim) {
-    			}});
-        	
-        	TranslateAnimation transAnimation = new TranslateAnimation(Animation.ABSOLUTE, 0,Animation.ABSOLUTE, 0, Animation.ABSOLUTE, mTopActionbarLayout.getTop(), Animation.ABSOLUTE, -mStatusBarHeight);
-        	AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
-        	set.addAnimation(transAnimation);
-        	set.addAnimation(alphaAnimation);
-        	// Start animation
-        	mTopActionbarLayout.startAnimation(set);
-    	} else {
-      		// Hide Google style view layout without animation
-    		((FrameLayout.LayoutParams) mTopActionbarLayout.getLayoutParams()).topMargin = -mActionBarHeight;
-    		mTopActionbarLayout.setVisibility(View.INVISIBLE);
-    	}
-
-    	mGoogleStyleProgressLayout.setVisibility(View.INVISIBLE);
-    }
-    
 	@Override
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
 		mWindowAttached = true;
 		
-		initTopViewGroup();
 		updateUIForGoogleStyleMode();
 	}
 
-	/**
-     * Initialize {@code mTopActionbarLayout} and add that into Top DecorView(this is the root view),
-     * and initialize needed components
-     */   
-	private void initTopViewGroup() {
-
-		// Skip if this view is loaded from preview mode of IDE
-		if (isInEditMode()) {
-			return;
-		}
-        if ( mMode.showGoogleStyle() == false ) {
-            return;
-        }
-
-		View view = this.getRootView();
-		ViewGroup topViewGroup = null;
-		Context context = getContext();
-		if (view instanceof ViewGroup == false) {
-			Log.w(LOG_TAG, "Current root view is not ViewGroup type. Google Style Pull To Refresh mode will be disabled.");
-			topViewGroup = new ViewGroup(context) {
-				@Override
-				protected void onLayout(boolean changed, int l, int t, int r, int b) {
-					// do nothing
-				}};
-
-		} else {
-			topViewGroup = (ViewGroup) view;
-		}
-
-		// Initialize Top Layout Layout
-		FrameLayout layout = new FrameLayout(context);
-
-		@SuppressWarnings("deprecation")
-		int matchParent = ViewGroup.LayoutParams.FILL_PARENT;
-		
-		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(matchParent, mActionBarHeight);
-		
-		topViewGroup.addView(layout, params);
-		layout.setVisibility(View.INVISIBLE);
-
-		// Initialize refreshing bar on center
-        if (mMode.showGoogleStyle()) {
-            mRefreshableViewProgressBar = generateCircleProgressBar(context);
-            FrameLayout.LayoutParams barParams = new FrameLayout.LayoutParams(mRefeshableViewRefreshingBarWidth, mRefeshableViewRefreshingBarHeight);
-            barParams.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
-            mRefreshableViewProgressBar.setVisibility(View.INVISIBLE);
-            mRefreshableViewWrapper.addView(mRefreshableViewProgressBar, -1, barParams);        	
-        }
-		// Initialize Google style progress layout
-		topViewGroup.addView(mGoogleStyleProgressLayout, mGoogleStyleProgressLayout.createLayoutParams());
-		mGoogleStyleProgressLayout.setVisibility(View.INVISIBLE);
-		// Set height of Google style progress layout
-		post(new Runnable(){
-
-			@Override
-			public void run() {
-				determineYPositionOfGoogleStyleProgressLayout();
-				mGoogleStyleProgressLayout.setTopMargin(mYPositionOfGoogleStyleProgressLayout);
-				
-			}});
-
-		// Finally assign
-		mTopActionbarLayout = layout;
-
-	}
 	/**
 	 * Get an actionBar's size and save into a field
 	 * @param context
@@ -1721,23 +1393,10 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 	private void initStatusBarSize(Context context) {
 		mStatusBarHeight = Utils.getStatusBarSize(context);
 	}
-	/**
-	 * Generate Progress bar UI Component on center
-	 * @param context
-	 * @return Generated ProgressBar instance
-	 */
-	private ProgressBar generateCircleProgressBar(Context context) {
-        ProgressBar circleProgressBar = new ProgressBar(context);
-        circleProgressBar.setScrollBarStyle(android.R.attr.progressBarStyle);
-        circleProgressBar.setIndeterminate(true);
-		
-		return circleProgressBar;
-	}
 
 	private boolean isReadyForPull() {
 		switch (mMode) {
 			case PULL_FROM_START:
-			case GOOGLE_STYLE:
 				return isReadyForPullStart();
 			case PULL_FROM_END:
 				return isReadyForPullEnd();
@@ -1776,10 +1435,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 				newScrollValue = Math.round(Math.max(initialMotionValue - lastMotionValue, 0) / mFriction);
 				itemDimension = getFooterSize();
 				break;
-			case GOOGLE_STYLE:
-				newScrollValue = Math.round(Math.min(initialMotionValue - lastMotionValue, 0) / mFriction);
-				itemDimension = getGoogleStyleViewSize();
-				break;
 			case PULL_FROM_START:
 			default:
 				newScrollValue = Math.round(Math.min(initialMotionValue - lastMotionValue, 0) / mFriction);
@@ -1794,10 +1449,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 			switch (mCurrentMode) {
 				case PULL_FROM_END:
 					mFooterLayout.onPull(scale);
-					break;
-				case GOOGLE_STYLE:
-					mGoogleStyleViewLayout.onPull(scale);
-					mGoogleStyleProgressLayout.onPull(scale);
 					break;
 				case PULL_FROM_START:
 				default:
@@ -1923,23 +1574,7 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 		 * setting the Refresh state via
 		 * {@link PullToRefreshBase#setRefreshing() setRefreshing()}.
 		 */
-		MANUAL_REFRESH_ONLY(0x4),
-
-		/**
-		 * Google style pull-to-refresh mode
-		 *
-		 */
-		GOOGLE_STYLE(0x5);
-		
-		/**
-		 * @deprecated Use {@link #PULL_FROM_START} from now on.
-		 */
-		public static Mode PULL_DOWN_TO_REFRESH = Mode.PULL_FROM_START;
-
-		/**
-		 * @deprecated Use {@link #PULL_FROM_END} from now on.
-		 */
-		public static Mode PULL_UP_TO_REFRESH = Mode.PULL_FROM_END;
+		MANUAL_REFRESH_ONLY(0x4);
 
 		/**
 		 * Maps an int to a specific mode. This is needed when saving state, or
@@ -1990,13 +1625,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 		 */
 		public boolean showFooterLoadingLayout() {
 			return this == PULL_FROM_END || this == BOTH || this == MANUAL_REFRESH_ONLY;
-		}
-
-		/**
-		 * @return true if this mode wants the Loading Layout to be shown like Google style pull-to-refresh
-		 */
-		public boolean showGoogleStyle() {
-			return this == GOOGLE_STYLE;
 		}
 
 		int getIntValue() {

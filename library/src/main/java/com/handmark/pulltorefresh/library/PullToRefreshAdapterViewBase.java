@@ -16,9 +16,6 @@
  *******************************************************************************/
 package com.handmark.pulltorefresh.library;
 
-import java.util.Arrays;
-import java.util.List;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -37,9 +34,12 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 
-import com.handmark.pulltorefresh.library.internal.IndicatorLayout;
 import com.handmark.pulltorefresh.library.internal.EmptyViewMethodAccessor;
+import com.handmark.pulltorefresh.library.internal.IndicatorLayout;
 import com.handmark.pulltorefresh.library.internal.LoadingLayout;
+
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class PullToRefreshAdapterViewBase<T extends AbsListView> extends PullToRefreshBase<T> implements
 		OnScrollListener {
@@ -73,7 +73,7 @@ public abstract class PullToRefreshAdapterViewBase<T extends AbsListView> extend
 	/**
 	 * <p>
 	 * Indicator Layout Class Token <br /> {@link IndicatorLayoutFactory} will create instances by using this class token.
-	 * The token must not be null. {@link IndicatorLayoutFacoty} ensures that class token exists always.
+	 * The token must not be null. {@link com.handmark.pulltorefresh.library.IndicatorLayoutFactory} ensures that class token exists always.
 	 * Assignment some class token into this variable is implemented at {@link #handleStyledAttributes(TypedArray)}.
 	 * </p>
 	 */

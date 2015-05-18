@@ -15,18 +15,17 @@
  *******************************************************************************/
 package com.handmark.pulltorefresh.configuration.xml;
 
-import java.io.IOException;
+import android.content.Context;
+import android.content.res.Resources;
+import android.util.Log;
+
+import com.handmark.pulltorefresh.library.R;
+import com.handmark.pulltorefresh.library.internal.Assert;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.handmark.pulltorefresh.library.R;
-import com.handmark.pulltorefresh.library.internal.Assert;
-import com.handmark.pulltorefresh.library.internal.Utils;
-
-import android.content.Context;
-import android.content.res.Resources;
-import android.util.Log;
+import java.io.IOException;
 
 /**
  * {@code PullToRefreshXmlConfiguration} is an information set of PullToRefresh. It contains a list of indicator layouts and of loading layouts. An information set of PullToRefresh is converted from pulltorefresh.xml.<br />
@@ -135,28 +134,6 @@ public class PullToRefreshXmlConfiguration {
 		}
 		return node.getIndicatorLayoutClazzName(layoutCode);
 	}
-	/**
-	 * @param layoutCode Layout name
-	 * @return Layout Class name ( ex: com.handmark.pulltorefresh.library.internal.DefaultGoogleStyleViewLayout )
-	 */
-	public String getGoogleStyleViewLayoutClazzName(String layoutCode) {
-		assertInitialized();
-		if ( isNodeNull() ) {
-			return null;
-		}
-		return node.getGoogleStyleViewLayoutClazzName(layoutCode);
-	}
-	/**
-	 * @param layoutCode Layout name
-	 * @return Layout Class name ( ex: com.handmark.pulltorefresh.library.internal.DefaultGoogleStyleProgressLayout )
-	 */
-	public String getGoogleStyleProgressLayoutClazzName(String layoutCode) {
-		assertInitialized();
-		if ( isNodeNull() ) {
-			return null;
-		}
-		return node.getGoogleStyleProgressLayoutClazzName(layoutCode);
-	}	
 	/**
 	 * @return true if {@code node} is null
 	 */

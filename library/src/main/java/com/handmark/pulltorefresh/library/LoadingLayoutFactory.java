@@ -15,10 +15,6 @@
  *******************************************************************************/
 package com.handmark.pulltorefresh.library;
 
-import java.lang.reflect.Constructor;
-
-import java.lang.reflect.InvocationTargetException;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.Log;
@@ -27,8 +23,11 @@ import android.view.View;
 import com.handmark.pulltorefresh.configuration.xml.PullToRefreshXmlConfiguration;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.Mode;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.Orientation;
-import com.handmark.pulltorefresh.library.internal.RotateLoadingLayout;
 import com.handmark.pulltorefresh.library.internal.LoadingLayout;
+import com.handmark.pulltorefresh.library.internal.RotateLoadingLayout;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 /**
  * Factory which creates loading layouts 
  * <br />Loading layouts must be listed in pulltorefresh.xml as "PullToRefresh/LoadingLayouts/layout" nodes
@@ -48,10 +47,8 @@ class LoadingLayoutFactory {
 		return createLoadingLayoutClazz(clazzName);
 	}
 	/**
-	 * Create a {@code LoadingLayout} instance matched by <b>{@code clazz} token</b> 
-	 * @param layoutCode Loading layout code, which must be defined in pulltorefresh.xml
-	 * @param context 
-	 * @param mode 
+	 * Create a {@code LoadingLayout} instance matched by <b>{@code clazz} token</b>
+   * @param clazzName
 	 * @return {@code LoadingLayout} instance if the class matched by {@code layoutCode} exists, or {@code RotateLoadingLayout} instance if not  
 	 */
 	@SuppressWarnings("unchecked")
@@ -86,9 +83,9 @@ class LoadingLayoutFactory {
 		return createLoadingLayout(clazz, context, mode, orientation, attrs);
 	}
 	/**
-	 * Create a {@code LoadingLayout} instance matched by <b>{@code clazz} token</b> 
-	 * @param layoutCode Loading layout code, which must be defined in pulltorefresh.xml
-	 * @param context 
+	 * Create a {@code LoadingLayout} instance matched by <b>{@code clazz} token</b>
+   * @param clazz
+	 * @param context
 	 * @param mode 
 	 * @return {@code LoadingLayout} instance if the class matched by {@code layoutCode} exists, or {@code RotateLoadingLayout} instance if not  
 	 */

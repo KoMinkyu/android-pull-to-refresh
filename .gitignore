@@ -2,6 +2,12 @@
 bin
 gen
 library/build/
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
 
 #Eclipse
 .project
@@ -15,6 +21,16 @@ library/build/
 *.iws
 out
 
+#built application files
+*.apk
+*.ap_
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
 #Maven
 target
 release.properties
@@ -23,7 +39,31 @@ pom.xml.*
 #Ant
 build.xml
 local.properties
+
 proguard.cfg
 
-#OSX
+# generated files
+bin/
+gen/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Windows thumbnail db
+Thumbs.db
+
+# OSX files
 .DS_Store
+
+# Eclipse project files
+.classpath
+.project
+
+# Android Studio
+*.iml
+.idea
+.idea/
+#.idea/workspace.xml - remove # and delete .idea if it better suit your needs.
+.gradle
+build/
+

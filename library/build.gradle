@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.11.+'
+        classpath 'com.android.tools.build:gradle:1.0.0'
     }
 }
 
@@ -16,6 +16,10 @@ apply plugin: 'signing'
 android {
     compileSdkVersion Integer.parseInt(ANDROID_COMPILE_SDK_VERSION)
     buildToolsVersion ANDROID_BUILD_TOOLS_VERSION
+
+    lintOptions {
+        abortOnError false
+    }
 
     sourceSets {
     	main {

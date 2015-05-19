@@ -1,7 +1,7 @@
-# Pull To Refresh Views for Android `Renewal`! v3.2
-### This project is a fork of Chris Banes' Android-PullToRefresh project. The project provides flexibility in customization in addition to adding brand new features listed below.
+# Pull To Refresh Views for Android `simplified`!
+### This project is a fork of naver/Android-PullToRefresh project. The project just simplified with Google style pull to refresh animation deletion.
 - __New!__ AAR package support
-- Google-like pull to refresh animation support (in Android 3.x or 4.x)
+- Google-like pull to refresh animation deleted
 
   *__NOTE__: This style is now supported in [Android Support Library](http://developer.android.com/reference/android/support/v4/widget/SwipeRefreshLayout.html).
   I recommend you to use the support library instead of this library, unless you are already using and want to change the style from old style to it.*
